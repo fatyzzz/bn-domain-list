@@ -5,6 +5,7 @@ on:
       - master
     paths-ignore:
       - "**/README.md"
+
 jobs:
   build:
     name: Build
@@ -33,19 +34,28 @@ jobs:
           go run ./ --outputdir=../ --exportlists=category-ads-all,apple,icloud
           cd ../ && rm -rf code
 
-      - name: Generate dlc.dat sha256 hash
+      - name: Duplicate dlc.dat as geosite.dat
+        run: |
+          cp dlc.dat geosite.dat
+
+      - name: Generate dlc.dat and geosite.dat sha256 hashes
         run: |
           sha256sum dlc.dat > dlc.dat.sha256sum
+          sha256sum geosite.dat > geosite.dat.sha256sum
 
       - name: Generate Zip
         run: |
           zip -9 dlc.dat.zip dlc.dat
+          zip -9 geosite.dat.zip geosite.dat
           sha256sum dlc.dat.zip > dlc.dat.zip.sha256sum
+          sha256sum geosite.dat.zip > geosite.dat.zip.sha256sum
 
       - name: Generate XZ
         run: |
           xz -z -9 -k dlc.dat
+          xz -z -9 -k geosite.dat
           sha256sum dlc.dat.xz > dlc.dat.xz.sha256sum
+          sha256sum geosite.dat.xz > geosite.dat.xz.sha256sum
 
       - name: Git push assets to "release" branch
         run: |
@@ -53,13 +63,14 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b release
-          git add *.txt *.sha256sum dlc.dat dlc.dat.zip dlc.dat.xz
+          git add *.txt *.sha256sum dlc.dat dlc.dat.zip dlc.dat.xz geosite.dat geosite.dat.zip geosite.dat.xz
           git commit -m "${{ env.RELEASE_NAME }}"
           git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push -f -u origin release
 
       - name: Release and upload assets
         run: |
-          gh release create ${{ env.TAG_NAME }} --generate-notes --latest --title ${{ env.RELEASE_NAME }} ./dlc.dat ./dlc.dat.*
+          gh release create ${{ env.TAG_NAME }} --generate-notes --latest --title ${{ env.RELEASE_NAME }} \
+            ./dlc.dat ./dlc.dat.* ./geosite.dat ./geosite.dat.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
