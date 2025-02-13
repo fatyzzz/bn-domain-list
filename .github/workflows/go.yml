@@ -28,13 +28,7 @@ jobs:
 
       - name: Make list.txt file
         run: |
-          cd code
-          ls
-          cd data
-          ls -p | grep -v / > list.txt
-          cd ../
-          mv code/data/list.txt .
-          rm code/data/list.txt
+          ls -p code/data | grep -v / > list.txt
 
       - name: Build dlc.dat file
         run: |
