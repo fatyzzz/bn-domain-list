@@ -5,12 +5,10 @@ on:
       - master
     paths-ignore:
       - "**/README.md"
-
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout codebase
         uses: actions/checkout@v4
@@ -57,13 +55,25 @@ jobs:
           sha256sum dlc.dat.xz > dlc.dat.xz.sha256sum
           sha256sum geosite.dat.xz > geosite.dat.xz.sha256sum
 
+      # Новый шаг: Генерация list.txt из файлов в папке data
+      - name: Generate list.txt from data files
+        run: |
+          # Предполагается, что файлы находятся в папке data
+          mkdir -p data || true  # Убедимся, что папка существует
+          cd data || exit 1
+          for file in *.txt; do
+            echo "${file%.*}" >> ../list.txt
+          done
+          cd ..
+          cat list.txt  # Проверяем содержимое файла
+
       - name: Git push assets to "release" branch
         run: |
           git init
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b release
-          git add *.txt *.sha256sum dlc.dat dlc.dat.zip dlc.dat.xz geosite.dat geosite.dat.zip geosite.dat.xz
+          git add *.txt *.sha256sum dlc.dat dlc.dat.zip dlc.dat.xz geosite.dat geosite.dat.zip geosite.dat.xz list.txt
           git commit -m "${{ env.RELEASE_NAME }}"
           git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push -f -u origin release
@@ -71,6 +81,6 @@ jobs:
       - name: Release and upload assets
         run: |
           gh release create ${{ env.TAG_NAME }} --generate-notes --latest --title ${{ env.RELEASE_NAME }} \
-            ./dlc.dat ./dlc.dat.* ./geosite.dat ./geosite.dat.*
+            ./dlc.dat ./dlc.dat.* ./geosite.dat ./geosite.dat.* ./list.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
