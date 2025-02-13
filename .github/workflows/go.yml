@@ -28,10 +28,10 @@ jobs:
 
       - name: Make list.txt file
         run: |
-          cd ./code || { echo "Directory ./code not found"; exit 1; }
+          cd code || { echo "Directory ./code not found"; exit 1; }
           ls -p | grep -v / > list.txt
-          cd ..
-          mv ./code/list.txt .
+          cd ../
+          mv code/list.txt .
 
       - name: Build dlc.dat file
         run: |
