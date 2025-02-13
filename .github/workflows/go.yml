@@ -26,6 +26,13 @@ jobs:
           echo "TAG_NAME=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
         shell: bash
 
+      - name: Make list.txt file
+        run: |
+          cd ./code || { echo "Directory ./code not found"; exit 1; }
+          ls -p | grep -v / > list.txt
+          cd ..
+          mv ./code/list.txt .
+
       - name: Build dlc.dat file
         run: |
           cd code || exit 1
@@ -54,11 +61,6 @@ jobs:
           xz -z -9 -k geosite.dat
           sha256sum dlc.dat.xz > dlc.dat.xz.sha256sum
           sha256sum geosite.dat.xz > geosite.dat.xz.sha256sum
-
-      # Новый шаг: Генерация list.txt из файлов в папке data
-      - name: Generate list.txt from data files
-        run: |
-          ls ./
 
       - name: Git push assets to "release" branch
         run: |
