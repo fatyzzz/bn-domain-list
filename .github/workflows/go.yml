@@ -58,29 +58,7 @@ jobs:
       # Новый шаг: Генерация list.txt из файлов в папке data
       - name: Generate list.txt from data files
         run: |
-          # Убедимся, что папка data существует
-          mkdir -p data || true
-      
-          # Проверяем наличие любых файлов в папке data
-          cd data || exit 1
-          if [ -z "$(ls -A 2>/dev/null)" ]; then
-            echo "No files found in the 'data' directory. Creating an empty list.txt."
-            echo "" > ../list.txt  # Создаем пустой list.txt
-          else
-            # Если файлы есть, записываем их имена в list.txt
-            for file in *; do
-              # Игнорируем поддиректории, добавляем только файлы
-              if [ -f "$file" ]; then
-                echo "$file" >> ../list.txt
-              fi
-            done
-          fi
-      
-          # Возвращаемся в родительскую директорию
-          cd ..
-      
-          # Проверяем содержимое list.txt
-          cat list.txt
+          ls ./
 
       - name: Git push assets to "release" branch
         run: |
